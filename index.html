@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feliz Dia das Mulheres ✨</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400&family=Parisienne&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --rose-gold: #b76e79;
+            --soft-gold: #e2c285;
+            --magenta-glow: #ff2a85;
+            --deep-purple: #1a0b2e;
+            --ethereal-pink: #ffd1dc;
+            --text-light: #fdf5f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--deep-purple);
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-light);
+        }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .ambient-light {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 42, 133, 0.08) 0%, rgba(26, 11, 46, 0.7) 70%, rgba(5, 0, 15, 1) 100%);
+            z-index: 2;
+            pointer-events: none;
+            transition: all 4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .ambient-light.bloom {
+            background: radial-gradient(circle at 50% 50%, rgba(255, 42, 133, 0.25) 0%, rgba(26, 11, 46, 0.5) 60%, rgba(0, 0, 0, 0.95) 100%);
+        }
+
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            perspective: 1200px;
+            transition: opacity 1.5s ease-out, visibility 1.5s;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 60px 50px;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7), inset 0 0 30px rgba(255, 255, 255, 0.03);
+            transform: translateZ(0) translateY(0);
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            animation: card-enter 2s 0.5s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes card-enter {
+            0% {
+                opacity: 0;
+                transform: translateY(60px) scale(0.9) rotateX(15deg);
+                filter: blur(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotateX(0deg);
+                filter: blur(0);
+            }
+        }
+
+        .intro-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.2rem;
+            font-weight: 300;
+            margin-bottom: 40px;
+            color: var(--ethereal-pink);
+            letter-spacing: 1px;
+            line-height: 1.4;
+            text-shadow: 0 4px 15px rgba(255, 209, 220, 0.15);
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+
+        .input-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--soft-gold), transparent);
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-wrapper:focus-within::after {
+            width: 100%;
+            left: 0;
+            box-shadow: 0 0 15px var(--soft-gold);
+        }
+
+        #name-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 15px 10px;
+            font-size: 1.6rem;
+            color: #fff;
+            text-align: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #name-input::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-magic {
+            background: transparent;
+            color: var(--soft-gold);
+            border: 1px solid rgba(226, 194, 133, 0.3);
+            padding: 18px 45px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            border-radius: 50px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 300;
+            outline: none;
+        }
+
+        .btn-magic::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(226, 194, 133, 0.25), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-magic:hover {
+            border-color: var(--soft-gold);
+            color: #fff;
+            box-shadow: 0 0 30px rgba(226, 194, 133, 0.4), inset 0 0 10px rgba(226, 194, 133, 0.1);
+            transform: translateY(-3px);
+            letter-spacing: 5px;
+        }
+
+        .btn-magic:hover::before {
+            left: 100%;
+        }
+
+        .glass-card.shatter {
+            animation: shatter 2s forwards cubic-bezier(0.55, 0.055, 0.675, 0.19);
+        }
+
+        @keyframes shatter {
+            0% {
+                opacity: 1;
+                transform: scale(1) translateZ(0) rotateY(0);
+                filter: blur(0);
+            }
+
+            30% {
+                transform: scale(1.05) translateZ(100px) rotateY(5deg);
+                filter: blur(3px);
+                opacity: 0.9;
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(1.8) translateZ(400px) rotateY(20deg) rotateX(10deg);
+                filter: blur(30px);
+                visibility: hidden;
+            }
+        }
+
+        .error-shake {
+            animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+
+        #main-tribute {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            padding: 20px;
+            pointer-events: none;
+        }
+
+        .tribute-content {
+            text-align: center;
+            max-width: 1000px;
+            perspective: 1000px;
+        }
+
+        .greeting-wrapper {
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .greeting-prefix {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 200;
+            font-size: 1.1rem;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+            display: block;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .name-reveal {
+            font-family: 'Parisienne', cursive;
+            font-size: 8rem;
+            line-height: 1.2;
+            padding: 10px;
+            background: linear-gradient(135deg, #ffd1dc 0%, #ffffff 50%, #e2c285 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            opacity: 0;
+            transform: scale(0.8) translateZ(-100px);
+            filter: blur(20px);
+            text-shadow: 0 0 50px rgba(255, 42, 133, 0);
+        }
+
+        .poetry-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .line {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.1rem;
+            font-weight: 300;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.85);
+            opacity: 0;
+            transform: translateY(40px) rotateX(-30deg);
+            transform-origin: center top;
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .show-prefix {
+            animation: fade-up 2s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .show-name {
+            animation: cinematic-reveal 3s forwards cubic-bezier(0.165, 0.84, 0.44, 1);
+            animation-delay: 0.5s;
+        }
+
+        .show-line {
+            animation: float-up-3d 2.5s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes fade-up {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes cinematic-reveal {
+            30% {
+                filter: blur(5px);
+                opacity: 1;
+                transform: scale(1.05) translateZ(50px);
+                text-shadow: 0 0 40px rgba(255, 42, 133, 0.4);
+            }
+
+            100% {
+                filter: blur(0);
+                opacity: 1;
+                transform: scale(1) translateZ(0);
+                text-shadow: 0 0 45px rgba(255, 42, 133, 0.7), 0 0 80px rgba(226, 194, 133, 0.3);
+            }
+        }
+
+        @keyframes float-up-3d {
+            to {
+                opacity: 1;
+                transform: translateY(0) rotateX(0);
+            }
+        }
+
+        #audio-trigger {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
+        }
+
+        #audio-trigger:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.15);
+            color: #fff;
+            border-color: var(--soft-gold);
+            box-shadow: 0 0 25px rgba(226, 194, 133, 0.3);
+        }
+
+        .audio-waves {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid var(--soft-gold);
+            opacity: 0;
+            animation: ripple 2.5s infinite cubic-bezier(0.1, 0.2, 0.8, 1.0);
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .name-reveal {
+                font-size: 6rem;
+            }
+
+            .line {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .name-reveal {
+                font-size: 4.5rem;
+            }
+
+            .line {
+                font-size: 1.4rem;
+                padding: 0 15px;
+            }
+
+            .greeting-prefix {
+                font-size: 0.9rem;
+                letter-spacing: 5px;
+            }
+
+            .intro-title {
+                font-size: 1.8rem;
+            }
+
+            .glass-card {
+                padding: 45px 30px;
+            }
+
+            #audio-trigger {
+                bottom: 25px;
+                right: 25px;
+                width: 45px;
+                height: 45px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .name-reveal {
+                font-size: 3.2rem;
+            }
+
+            .line {
+                font-size: 1.1rem;
+            }
+
+            .greeting-prefix {
+                font-size: 0.75rem;
+                letter-spacing: 4px;
+            }
+
+            .glass-card {
+                padding: 40px 20px;
+            }
+
+            .intro-title {
+                font-size: 1.5rem;
+            }
+
+            #name-input {
+                font-size: 1.3rem;
+            }
+
+            .btn-magic {
+                padding: 15px 35px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="ambient-light" id="ambientLight"></div>
+
+    <audio id="bg-music" loop>
+        <source src="musica.mp3" type="audio/mpeg">
+    </audio>
+    <div id="intro-screen">
+        <div class="glass-card" id="card">
+            <h1 class="intro-title">Digite seu nome para receber<br>uma homenagem?</h1>
+            <div class="input-wrapper">
+                <input type="text" id="name-input" placeholder="O seu lindo nome..." autocomplete="off">
+            </div>
+            <button class="btn-magic" id="submit-btn" aria-label="Avançar para homenagem">Revelar a Magia</button>
+        </div>
+    </div>
+
+    <div id="main-tribute">
+        <div class="tribute-content">
+            <div class="greeting-wrapper">
+                <span class="greeting-prefix" id="prefix">Feliz Dia das Mulheres</span>
+                <h1 class="name-reveal" id="user-name"></h1>
+            </div>
+
+            <div class="poetry-lines" id="poetry">
+                <p class="line">Uma força sublime da natureza, tecida com bravura e delicadeza.</p>
+                <p class="line">O mundo é infinitamente mais belo porque você caminha por ele.</p>
+                <p class="line">Que a sua luz interior continue a iluminar os dias escuros,</p>
+                <p class="line">Pois você é a poesia mais perfeita que o universo já escreveu. ✨</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="audio-trigger" title="Ligar / Desligar Música">
+        🎵
+        <div class="audio-waves" style="display: none;" id="waves"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d', { alpha: false });
+
+        let width, height;
+        let particles = [];
+        let mouse = { x: -1000, y: -1000 };
+        let cinematicMode = false;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX; mouse.y = e.clientY;
+        });
+        window.addEventListener('touchmove', (e) => {
+            mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY;
+        });
+        window.addEventListener('mouseout', () => {
+            mouse.x = -1000; mouse.y = -1000;
+        });
+
+        class MagicParticle {
+            constructor() {
+                this.reset(true);
+            }
+
+            reset(initial = false) {
+                this.x = Math.random() * width;
+                this.y = initial ? Math.random() * height : height + (Math.random() * 200 + 50);
+
+                this.size = Math.random() * 2.5 + 0.5;
+                this.speedY = (Math.random() * -0.8) - 0.2;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+
+                this.baseOpacity = Math.random() * 0.6 + 0.1;
+                this.color = this.getRandomAestheticColor();
+                this.angle = Math.random() * Math.PI * 2;
+                this.spin = (Math.random() - 0.5) * 0.04;
+
+                this.type = Math.random() > 0.85 ? 'petal' : 'orb';
+            }
+
+            getRandomAestheticColor() {
+                const colors = [
+                    'rgba(255, 183, 178, OP)',
+                    'rgba(226, 194, 133, OP)',
+                    'rgba(255, 42, 133, OP)',
+                    'rgba(224, 170, 255, OP)',
+                    'rgba(255, 255, 255, OP)'
+                ];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            update() {
+                let targetSpeedY = cinematicMode ? this.speedY * 1.8 : this.speedY;
+
+                this.y += targetSpeedY;
+                this.x += this.speedX + (Math.sin(this.angle) * 0.4);
+                this.angle += this.spin;
+
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 180) {
+                    let force = (180 - distance) / 180;
+                    this.x -= (dx / distance) * force * 2;
+                    this.y -= (dy / distance) * force * 2;
+                }
+
+                if (this.y < -100 || this.x < -100 || this.x > width + 100) {
+                    this.reset(false);
+                    this.x = Math.random() * width;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+
+                let currentOp = this.baseOpacity + (Math.sin(Date.now() * 0.0015 + this.angle) * 0.3);
+                currentOp = Math.max(0, Math.min(1, currentOp));
+
+                let fillStyle = this.color.replace('OP', currentOp.toFixed(2));
+
+                if (this.type === 'orb') {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = fillStyle;
+
+                    if (cinematicMode && this.size > 1.5) {
+                        ctx.shadowBlur = this.size * 5;
+                        ctx.shadowColor = fillStyle.replace(/0\.\d+\)/, '0.8)');
+                    }
+                    ctx.fill();
+                } else if (this.type === 'petal') {
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.quadraticCurveTo(this.size * 3, -this.size * 1.5, this.size * 4, 0);
+                    ctx.quadraticCurveTo(this.size * 3, this.size * 1.5, 0, 0);
+                    ctx.fillStyle = fillStyle;
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            let count = window.innerWidth < 768 ? 70 : 180;
+            for (let i = 0; i < count; i++) {
+                particles.push(new MagicParticle());
+            }
+        }
+        function animateCanvas() {
+            let trailAlpha = cinematicMode ? 0.25 : 0.15;
+            ctx.fillStyle = `rgba(26, 11, 46, ${trailAlpha})`;
+            ctx.fillRect(0, 0, width, height);
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+
+            requestAnimationFrame(animateCanvas);
+        }
+
+        initParticles();
+        animateCanvas();
+
+        const nameInput = document.getElementById('name-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const card = document.getElementById('card');
+        const introScreen = document.getElementById('intro-screen');
+        const ambientLight = document.getElementById('ambientLight');
+        const userNameEl = document.getElementById('user-name');
+        const prefixEl = document.getElementById('prefix');
+        const poetryLines = document.querySelectorAll('.line');
+        const audioTrigger = document.getElementById('audio-trigger');
+        const bgMusic = document.getElementById('bg-music');
+        const waves = document.getElementById('waves');
+
+        bgMusic.volume = 0.5;
+
+        setTimeout(() => nameInput.focus(), 500);
+
+        function explosaoLuminosa() {
+            for (let i = 0; i < 60; i++) {
+                let p = new MagicParticle();
+                p.x = width / 2;
+                p.y = height / 2;
+                p.speedX = (Math.random() - 0.5) * 15;
+                p.speedY = (Math.random() - 0.5) * 15;
+                p.size = Math.random() * 4 + 2;
+                p.type = 'orb';
+                particles.push(p);
+            }
+        }
+
+        function playExperience() {
+            const rawName = nameInput.value.trim();
+
+            if (!rawName) {
+                card.classList.remove('error-shake');
+                void card.offsetWidth;
+                card.classList.add('error-shake');
+                return;
+            }
+
+            const formattedName = rawName.toLowerCase().split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+
+            userNameEl.textContent = formattedName;
+
+            card.classList.add('shatter');
+
+            cinematicMode = true;
+            ambientLight.classList.add('bloom');
+
+
+            bgMusic.play().then(() => {
+                waves.style.display = 'block';
+                audioTrigger.style.color = '#fff';
+            }).catch(e => {
+                console.log("Áudio bloqueado por autoplay policy, o usuário pode ligar no botão.", e);
+            });
+
+            setTimeout(() => {
+                introScreen.style.display = 'none';
+            }, 2000);
+            setTimeout(() => {
+                prefixEl.classList.add('show-prefix');
+            }, 1000);
+
+            setTimeout(() => {
+                userNameEl.classList.add('show-name');
+                explosaoLuminosa();
+
+                audioTrigger.style.opacity = '1';
+
+            }, 2600);
+
+            poetryLines.forEach((line, index) => {
+                setTimeout(() => {
+                    line.classList.add('show-line');
+                }, 4800 + (index * 1300));
+            });
+        }
+
+        submitBtn.addEventListener('click', playExperience);
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') playExperience();
+        });
+
+        audioTrigger.addEventListener('click', () => {
+            if (bgMusic.paused) {
+                bgMusic.play();
+                waves.style.display = 'block';
+                audioTrigger.style.color = '#fff';
+                audioTrigger.style.borderColor = 'var(--soft-gold)';
+            } else {
+                bgMusic.pause();
+                waves.style.display = 'none';
+                audioTrigger.style.color = 'rgba(255,255,255,0.5)';
+                audioTrigger.style.borderColor = 'rgba(255,255,255,0.1)';
+            }
+        });
+
+    </script>
+</body>
+
+</html>
